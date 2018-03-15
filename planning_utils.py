@@ -1,6 +1,7 @@
 from enum import Enum
 from queue import PriorityQueue
 import numpy as np
+import math
 
 
 def create_grid(data, drone_altitude, safety_distance):
@@ -37,6 +38,16 @@ def create_grid(data, drone_altitude, safety_distance):
                 int(np.clip(east + d_east + safety_distance - east_min, 0, east_size-1)),
             ]
             grid[obstacle[0]:obstacle[1]+1, obstacle[2]:obstacle[3]+1] = 1
+
+    if False:
+        for i in range (north_size-1,0,-1):
+            print ("%4d" % i,end=' ')
+            for j in range (0,east_size):
+                if (grid[i,j]==1):
+                    print ("X",end='')
+                else:
+                    print (".",end='')
+            print()
 
     return grid, int(north_min), int(east_min)
 

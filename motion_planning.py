@@ -1,3 +1,6 @@
+#import sys
+#sys.path.insert(0,'../MRA/udacidrone')
+
 import argparse
 import time
 import msgpack
@@ -133,8 +136,7 @@ class MotionPlanning(Drone):
         # IYPPA-1 begin
         # DONE: read lat0, lon0 from colliders into floating point values
         with open(COLLIDERS_FN) as f:
-            label = f.readline()
-            latLonStrArr = f.readline().rstrip().split(',')
+            latLonStrArr = f.readline().rstrip().replace('lat0','').replace('lon0 ','').split(',')
             lat0 = float(latLonStrArr[0])
             lon0 = float(latLonStrArr[1])
 
@@ -162,19 +164,21 @@ class MotionPlanning(Drone):
         data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=3)
         
         # Define a grid for a particular altitude and safety margin around obstacles
+
         grid, north_offset, east_offset = create_grid(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
+
         print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
         # Define starting point on the grid (this is just grid center)
-        grid_start = (north_offset, east_offset)
+        grid_start = (-north_offset, -east_offset)
 
         # IYPPA-3 begin
         # DONE: convert start position to current position rather than map center
         #start = (int(current_local_pos[0]+north_offset), int(current_local_pos[1]+east_offset))
-        grid_start = (int(current_local_pos[0]+north_offset), int(current_local_pos[1]+east_offset))
+        grid_start = (int(current_local_pos[0]-north_offset), int(current_local_pos[1]-east_offset))
         # IYPPA-3 end
 
         # Set goal as some arbitrary position on the grid
-        grid_goal = (north_offset + 10, east_offset + 10)
+        grid_goal = (-north_offset + 10, -east_offset + 10)
         # IYPPA-4 start
         # DONE: adapt to set goal as latitude / longitude position and convert
         # 37.795023,-122.400325 fails
@@ -186,8 +190,17 @@ class MotionPlanning(Drone):
         # 37.793794,-122.396580 crash
         #goal_local_pos = global_to_local([-122.397927,37.793600,self.global_home[2]],self.global_home)
         goal_local_pos = global_to_local([-122.402034,37.797330,self.global_home[2]],self.global_home)
-        grid_goal = (int(goal_local_pos[0]+north_offset), int(goal_local_pos[1]+east_offset))
-
+        grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
+        grid_goal = (461,510)
+        grid_goal = (325,455)
+        goal_local_pos = global_to_local([-122.396420,37.793691,self.global_home[2]],self.global_home)
+        grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
+        goal_local_pos = global_to_local([-122.402224,37.797330,self.global_home[2]],self.global_home)
+        grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
+        print ("fake grid_goal", grid_goal)
+        grid_goal = (918, 21) #XYZZY
+        grid_goal = (795, 117) #XYZZY
+        #grid_goal = (851, 21) #GOAL in rubric
         # IYPPA-4 end
 
         # Run A* to find a path from start to goal
@@ -205,7 +218,7 @@ class MotionPlanning(Drone):
         print ("revised path: ", path)
         # IYPPA-6 end
         # Convert path to waypoints
-        waypoints = [[p[0] - north_offset, p[1] - east_offset, TARGET_ALTITUDE, 0] for p in path]
+        waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
         # Set self.waypoints
         self.waypoints = waypoints
         # TODO: send waypoints to sim
@@ -230,7 +243,7 @@ if __name__ == "__main__":
     parser.add_argument('--host', type=str, default='127.0.0.1', help="host address, i.e. '127.0.0.1'")
     args = parser.parse_args()
 
-    conn = MavlinkConnection('tcp:{0}:{1}'.format(args.host, args.port), timeout=60)
+    conn = MavlinkConnection('tcp:{0}:{1}'.format(args.host, args.port), timeout=600)
     drone = MotionPlanning(conn)
     time.sleep(1)
 

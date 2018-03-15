@@ -181,26 +181,9 @@ class MotionPlanning(Drone):
         grid_goal = (-north_offset + 10, -east_offset + 10)
         # IYPPA-4 start
         # DONE: adapt to set goal as latitude / longitude position and convert
-        # 37.795023,-122.400325 fails
-        # 37.793515,-122.397632 works
-        # 37.793375,-122.398791 fails
-        # 37.793490,-122.397895 works
-        # 37.793600,-122.397927 works
-        # 37.793528,-122.398560 crash
-        # 37.793794,-122.396580 crash
-        #goal_local_pos = global_to_local([-122.397927,37.793600,self.global_home[2]],self.global_home)
-        goal_local_pos = global_to_local([-122.402034,37.797330,self.global_home[2]],self.global_home)
+	# 37.794347, -122.402290
+        goal_local_pos = global_to_local([-122.402290,37.794347,self.global_home[2]],self.global_home)
         grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
-        grid_goal = (461,510)
-        grid_goal = (325,455)
-        goal_local_pos = global_to_local([-122.396420,37.793691,self.global_home[2]],self.global_home)
-        grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
-        goal_local_pos = global_to_local([-122.402224,37.797330,self.global_home[2]],self.global_home)
-        grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
-        print ("fake grid_goal", grid_goal)
-        grid_goal = (918, 21) #XYZZY
-        grid_goal = (795, 117) #XYZZY
-        #grid_goal = (851, 21) #GOAL in rubric
         # IYPPA-4 end
 
         # Run A* to find a path from start to goal

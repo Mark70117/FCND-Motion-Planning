@@ -74,9 +74,29 @@ sleep(1) instead of sleep(2)
 
 #### plan_path
 new.  generates waypoints and send them to simulator with send_waypoints
-TODO: expain in broad strokes what plan path does
+
+This code set some constants (TARGET_ALTITUDE, and SAFETY_DISTANCE) used in the construction
+of the obstacles vs free grid.
+It next loads in the colliders.csv file in to 'data' skipping the first two rows.
+The skipped rows being the home lat/log and the labels for the obstacle data.
+'create_grid' is called to determine which grid cells are covered by obstructions (or
+a safety margin around them) and which grid cells are available for flying the drone.
+The start location is set to the current position.
+The goal location is set to a go 10m North and 10m East.
+Both locationa are translated from a map centered on (0,0) to the collision grid
+coordinate system with (0,0) in the SouthWest corner.
+'a_star' is called to use the A* algoritm to search the free space for a path between
+the start and the goal.
+Only movement North, East, South, and West, all with a cost of 1, are allowed.
+The heuristic function passed to the A* algorith is the vector norm 'linalg.norm', which in our
+two dimensional space is equivalent to sqrt(x^2+y^2).
+The return path path is translated from grid coordiate system to map centered coordinate
+system waypoints by adding the offset between the origins of the two systems.
+Finally the waypoints are sent to the simulator to draw out the path in green balls and
+white lines.
 
 ##### send_waypoints
+
 new.  called from plan_path. use msgpack.dumps to write waypoints as data to simulator
 
 

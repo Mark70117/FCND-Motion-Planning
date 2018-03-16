@@ -170,7 +170,7 @@ class MotionPlanning(Drone):
         # IYPPA-2 end
 
         # Read in obstacle map
-        data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=3)
+        data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=2)
 
         # Define a grid for a particular altitude and safety margin around obstacles
 

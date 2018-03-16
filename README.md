@@ -83,8 +83,8 @@ The skipped rows being the home lat/log and the labels for the obstacle data.
 a safety margin around them) and which grid cells are available for flying the drone.
 The start location is set to the current position.
 The goal location is set to a go 10m North and 10m East.
-Both locationa are translated from a map centered on (0,0) to the collision grid
-coordinate system with (0,0) in the SouthWest corner.
+Both locations are translated from a map centered on (0,0) to the collision grid
+coordinate system with (0,0) in the South-West corner.
 'a_star' is called to use the A* algoritm to search the free space for a path between
 the start and the goal.
 Only movement North, East, South, and West, all with a cost of 1, are allowed.

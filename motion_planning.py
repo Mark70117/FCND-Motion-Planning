@@ -1,6 +1,3 @@
-#import sys
-#sys.path.insert(0,'../MRA/udacidrone')
-
 import argparse
 import time
 import msgpack
@@ -180,7 +177,8 @@ class MotionPlanning(Drone):
         grid, north_offset, east_offset = create_grid(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
 
         # Medial-Axis  Lesson6.13
-        skeleton = medial_axis(invert(grid))
+        if METHOD == AStarMethod.MEDIAL_AXIS:
+            skeleton = medial_axis(invert(grid))
 
         print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
         # Define starting point on the grid (this is just grid center)
@@ -193,33 +191,39 @@ class MotionPlanning(Drone):
         # IYPPA-3 end
 
         # Set goal as some arbitrary position on the grid
-        grid_goal = (-north_offset + 10, -east_offset + 10)
+        # grid_goal = (-north_offset + 10, -east_offset + 10)
+
         # IYPPA-4 start
         # DONE: adapt to set goal as latitude / longitude position and convert
-	# 37.794347, -122.402290
+	# 37.797330, -122.402224
         goal_local_pos = global_to_local([-122.402224,37.797330,self.global_home[2]],self.global_home)
         grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
+        if grid[grid_goal[0]][grid_goal[1]] > 0:   # a collision
+            print("\nERROR: specified goal is a collision, aborting planning!")
+            print("Resetting goal to start location\n")
+            grid_goal=grid_start
         # IYPPA-4 end
 
         # Medial-Axis
-        skel_start, skel_goal = find_skel_start_goal(skeleton, grid_start, grid_goal)
-        print("skel_start",skel_start)
-        print("skel_goal",skel_goal)
-
-        # Run A* to find a path from start to goal
-        # DONE: add diagonal motions with a cost of sqrt(2) to your A* implementation
-        # or move to a different search space such as a graph (not done here)
-        # IYPPA-5 in a_star [file: planning_utils.py]
-        print('Local Start and Goal: ', grid_start, grid_goal)
-        if METHOD == AStarMethod.GRID:
-            path, _ = a_star(grid, heuristic, grid_start, grid_goal)
         if METHOD == AStarMethod.MEDIAL_AXIS:
-            path, _ = a_star(
-                          invert(skeleton).astype(np.int32),
-                          skel_heuristic_func,
-                          tuple(skel_start),
-                          tuple(skel_goal)
-                      )
+            skel_start, skel_goal = find_skel_start_goal(skeleton, grid_start, grid_goal)
+
+        path = [grid_start]
+        if grid_goal != grid_start:
+            # Run A* to find a path from start to goal
+            # DONE: add diagonal motions with a cost of sqrt(2) to your A* implementation
+            # or move to a different search space such as a graph (not done here)
+            # IYPPA-5 in a_star [file: planning_utils.py]
+            print('Local Start and Goal: ', grid_start, grid_goal)
+            if METHOD == AStarMethod.GRID:
+                path, _ = a_star(grid, heuristic, grid_start, grid_goal)
+            if METHOD == AStarMethod.MEDIAL_AXIS:
+                path, _ = a_star(
+                              invert(skeleton).astype(np.int32),
+                              skel_heuristic_func,
+                              tuple(skel_start),
+                              tuple(skel_goal)
+                          )
 
 
         # DONE: prune path to minimize number of waypoints

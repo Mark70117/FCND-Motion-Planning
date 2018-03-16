@@ -85,16 +85,18 @@ new.  called from plan_path. use msgpack.dumps to write waypoints as data to sim
 #### [IYPPA-1] set_home_postion 
 
 This rubric item is marked in file motion_planning.py with comment IYPPA-1.
+
 The first line of colliders.csv is 'lat0 37.792480, lon0 -122.397450'.
 The file is opened in a with clause so it will be closed for the np.loadtxt.
 readline() reads the line as a string. rstrip() removes the newline at the end.
 str.replace() is used to remove the 'lat0' and 'lon0' characters. 
 The remaining character string is split on the ','.  float() is used to 
-convert the string to a floating point number
+convert the strings to a floating point numbers.
 
 #### [IYPPA-2] determine your local position relative to global home
 
 This rubric item is marked in file motion_planning.py with comment IYPPA-2.
+
 global_position is set to [self._longitude, self._latitude, self._altitude]
 global_to_local(global_position, self.global_home) determines the current
 local position.
@@ -113,7 +115,26 @@ grid_start = (int(current_local_pos[0]-north_offset), int(current_local_pos[1]-e
 
 #### [IYPPA-4 ] add flexibility to the desired goal location
 
+This rubric item is marked in file motion_planning.py with comment IYPPA-4.
+
+```
+        goal_local_pos = global_to_local([-122.402224,37.797330,self.global_home[2]],self.global_home)
+        grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
+```
+
+The goal location can be changed by replacing `-122.402224,37.797330` with the desired longitude,
+latitude.  global_to_local() translates the geotic coordinates to the local map reference frame.
+grid_goal is set by translating the local map reference coordinates into grid coordiantes by
+subtracting off the offset vector (north_offset, east_offset)
+
 #### [IYPPA-5] Write your search algorithm
+
+This rubric item is marked in files motion_planning.py, medial_axis_utils.py, and 
+planning_utils.py with comment IYPPA-5.
+
+The diagonal motions on the grid method of A* are  achieved by adding the actions
+NE, NW, SE, and SW with cost of sqrt(2).  valid_actions() is also modified to 
+remove NE, NW, SE, or SW when it would move off the grid, or collide.
 
 #### [IYPPA]-6] Cull waypoints from the path
 

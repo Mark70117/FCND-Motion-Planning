@@ -208,6 +208,7 @@ class MotionPlanning(Drone):
         if METHOD == AStarMethod.MEDIAL_AXIS:
             skel_start, skel_goal = find_skel_start_goal(skeleton, grid_start, grid_goal)
 
+        # IYPPA-5 begin
         path = [grid_start]
         if grid_goal != grid_start:
             # Run A* to find a path from start to goal
@@ -224,6 +225,7 @@ class MotionPlanning(Drone):
                               tuple(skel_start),
                               tuple(skel_goal)
                           )
+        # IYPPA-5 end 
 
 
         # DONE: prune path to minimize number of waypoints

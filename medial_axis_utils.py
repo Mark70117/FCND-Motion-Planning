@@ -13,5 +13,7 @@ def find_skel_start_goal(skel, start, goal):
     
     return near_start, near_goal
 
+# IYPPA-5 begin
 def skel_heuristic_func(position, goal_position):
     return np.sqrt((position[0] - goal_position[0])**2 + (position[1] - goal_position[1])**2)
+# IYPPA-5 end

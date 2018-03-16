@@ -84,9 +84,32 @@ new.  called from plan_path. use msgpack.dumps to write waypoints as data to sim
 
 #### [IYPPA-1] set_home_postion 
 
+This rubric item is marked in file motion_planning.py with comment IYPPA-1.
+The first line of colliders.csv is 'lat0 37.792480, lon0 -122.397450'.
+The file is opened in a with clause so it will be closed for the np.loadtxt.
+readline() reads the line as a string. rstrip() removes the newline at the end.
+str.replace() is used to remove the 'lat0' and 'lon0' characters. 
+The remaining character string is split on the ','.  float() is used to 
+convert the string to a floating point number
+
 #### [IYPPA-2] determine your local position relative to global home
 
+This rubric item is marked in file motion_planning.py with comment IYPPA-2.
+global_position is set to [self._longitude, self._latitude, self._altitude]
+global_to_local(global_position, self.global_home) determines the current
+local position.
+
 #### [IYPPA-3] change start point for planning to current local position
+
+This rubric item is marked in file motion_planning.py with comment IYPPA-3.
+
+north_offset and east_offset are the vector to (0,0) of the grid.  This
+vector is subtracted from the the current local position in the map
+reference frame to get the start position in the grid reference frame.
+
+```
+grid_start = (int(current_local_pos[0]-north_offset), int(current_local_pos[1]-east_offset))
+```
 
 #### [IYPPA-4 ] add flexibility to the desired goal location
 

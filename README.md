@@ -82,15 +82,15 @@ new.  called from plan_path. use msgpack.dumps to write waypoints as data to sim
 
 ### Implementing Your Path Planning Algorithm [IYPPA]
 
-#### [IYPPA-1] set_home_postion 
+#### [IYPPA-1] set_home_postion
 
 This rubric item is marked in file motion_planning.py with comment IYPPA-1.
 
 The first line of colliders.csv is 'lat0 37.792480, lon0 -122.397450'.
 The file is opened in a with clause so it will be closed for the np.loadtxt.
 readline() reads the line as a string. rstrip() removes the newline at the end.
-str.replace() is used to remove the 'lat0' and 'lon0' characters. 
-The remaining character string is split on the ','.  float() is used to 
+str.replace() is used to remove the 'lat0' and 'lon0' characters.
+The remaining character string is split on the ','.  float() is used to
 convert the strings to a floating point numbers.
 
 #### [IYPPA-2] determine your local position relative to global home
@@ -127,17 +127,43 @@ latitude.  global_to_local() translates the geotic coordinates to the local map 
 grid_goal is set by translating the local map reference coordinates into grid coordiantes by
 subtracting off the offset vector (north_offset, east_offset)
 
+The goal of lat 37.797330, lon -122.402224 (in the simulator world) of the original
+rubric is an alley way between buildings of the United States Immigrations and Customs
+Enforcement group in the real world.  While it is possible to fly into this space without
+a physical collision, it would be nevertheless unwise to set as a goal without explicit permision
+of this organization.
+
 #### [IYPPA-5] Write your search algorithm
 
-This rubric item is marked in files motion_planning.py, medial_axis_utils.py, and 
+This rubric item is marked in files motion_planning.py, medial_axis_utils.py, and
 planning_utils.py with comment IYPPA-5.
 
 The diagonal motions on the grid method of A* are  achieved by adding the actions
-NE, NW, SE, and SW with cost of sqrt(2).  valid_actions() is also modified to 
+NE, NW, SE, and SW with cost of sqrt(2).  valid_actions() is also modified to
 remove NE, NW, SE, or SW when it would move off the grid, or collide.
+
+The SAFETY margin was increased to 5m due to some alignemnt problems with the
+collision data and the simulator.  This was necessary because the grid method
+tends to plan close to the edge of the grid.
+
+The alternative A* method using medial axis was implementented.  The code used
+was essentially the code presented in lectures. Specifically Lesson 6, section
+13. 'Medial Axis Exercise'.   This method plans considerably faster than A* grid
+method.  Since it tends to stay as far away from collisions as possible, the
+SAFETY limit was left at the original 3m.
 
 #### [IYPPA]-6] Cull waypoints from the path
 
+This rubric item is marked in files motion_planning.py and
+pruning_utils.py with comment IYPPA-6.
+
+The prunning was done by using a collinearity test, essentially the code
+presented in lectures. Specifically Lesson 6, sections 5 and 9.
+
 ### Executing the flight [Etf]
+
+The way points have been successfully loaded onto the simulator and run.
+A modification was made to the translation from path to waypoints to convert
+values from numpy.int64 to native python int to allow for serialization.
 
 [//]: # (Mark Anderson // Feb 2018 cohort // 2018_03Mar_10)

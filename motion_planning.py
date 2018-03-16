@@ -138,7 +138,10 @@ class MotionPlanning(Drone):
         self.flight_state = States.PLANNING
         print("Searching for a path ...")
         TARGET_ALTITUDE = 5
-        SAFETY_DISTANCE = 5
+        if METHOD == AStarMethod.GRID:
+            SAFETY_DISTANCE = 5
+        if METHOD == AStarMethod.MEDIAL_AXIS:
+            SAFETY_DISTANCE = 3
 
         self.target_position[2] = TARGET_ALTITUDE
 
@@ -194,7 +197,7 @@ class MotionPlanning(Drone):
         # IYPPA-4 start
         # DONE: adapt to set goal as latitude / longitude position and convert
 	# 37.794347, -122.402290
-        goal_local_pos = global_to_local([-122.402290,37.794347,self.global_home[2]],self.global_home)
+        goal_local_pos = global_to_local([-122.402224,37.797330,self.global_home[2]],self.global_home)
         grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
         # IYPPA-4 end
 

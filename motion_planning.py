@@ -7,9 +7,13 @@ import msgpack
 from enum import Enum, auto
 
 import numpy as np
+from skimage.morphology import medial_axis
+from skimage.util import invert
 
 from planning_utils import a_star, heuristic, create_grid
 from pruning_utils import prune_path
+from medial_axis_utils import find_skel_start_goal, skel_heuristic_func
+
 from udacidrone import Drone
 from udacidrone.connection import MavlinkConnection
 from udacidrone.messaging import MsgID
@@ -25,7 +29,12 @@ class States(Enum):
     DISARMING = auto()
     PLANNING = auto()
 
+class AStarMethod(Enum):
+    GRID = auto()
+    MEDIAL_AXIS = auto()
+
 COLLIDERS_FN = 'colliders.csv'
+METHOD = AStarMethod.MEDIAL_AXIS
 
 # rubric key
 # IYPPA-1 -- Implementing Your Path Planning Algorithm // set home position
@@ -155,17 +164,20 @@ class MotionPlanning(Drone):
         # DONE: convert to current local position using global_to_local()
         current_local_pos = global_to_local(global_position,self.global_home)
         # print (current_local_pos)
-        
+
         print('global home {0}, position {1}, local position {2}'.format(self.global_home, self.global_position,
                                                                          self.local_position))
         # IYPPA-2 end
 
         # Read in obstacle map
         data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=3)
-        
+
         # Define a grid for a particular altitude and safety margin around obstacles
 
         grid, north_offset, east_offset = create_grid(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
+
+        # Medial-Axis  Lesson6.13
+        skeleton = medial_axis(invert(grid))
 
         print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
         # Define starting point on the grid (this is just grid center)
@@ -186,25 +198,42 @@ class MotionPlanning(Drone):
         grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
         # IYPPA-4 end
 
+        # Medial-Axis
+        skel_start, skel_goal = find_skel_start_goal(skeleton, grid_start, grid_goal)
+        print("skel_start",skel_start)
+        print("skel_goal",skel_goal)
+
         # Run A* to find a path from start to goal
         # DONE: add diagonal motions with a cost of sqrt(2) to your A* implementation
         # or move to a different search space such as a graph (not done here)
         # IYPPA-5 in a_star [file: planning_utils.py]
         print('Local Start and Goal: ', grid_start, grid_goal)
-        path, _ = a_star(grid, heuristic, grid_start, grid_goal)
-        
+        if METHOD == AStarMethod.GRID:
+            path, _ = a_star(grid, heuristic, grid_start, grid_goal)
+        if METHOD == AStarMethod.MEDIAL_AXIS:
+            path, _ = a_star(
+                          invert(skeleton).astype(np.int32),
+                          skel_heuristic_func,
+                          tuple(skel_start),
+                          tuple(skel_goal)
+                      )
+
+
         # DONE: prune path to minimize number of waypoints
-        # TODO (if you're feeling ambitious): Try a different approach altogether!
+        # DONE (if you're feeling ambitious): Try a different approach altogether!
         # IYPPA-6 begin
         print ("path: ", path)
+
         path = prune_path(path)
         print ("revised path: ", path)
+
         # IYPPA-6 end
         # Convert path to waypoints
-        waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
+        # !! int(p[i]) used to converty from numpty to native python for serialization
+        waypoints = [[int(p[0]) + north_offset, int(p[1]) + east_offset, TARGET_ALTITUDE, 0] for p in path]
         # Set self.waypoints
         self.waypoints = waypoints
-        # TODO: send waypoints to sim
+        # DONE: send waypoints to sim
         self.send_waypoints()
 
     def start(self):

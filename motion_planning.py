@@ -31,7 +31,8 @@ class AStarMethod(Enum):
     MEDIAL_AXIS = auto()
 
 COLLIDERS_FN = 'colliders.csv'
-METHOD = AStarMethod.MEDIAL_AXIS
+#METHOD = AStarMethod.MEDIAL_AXIS
+METHOD = AStarMethod.GRID
 
 # rubric key
 # IYPPA-1 -- Implementing Your Path Planning Algorithm // set home position
@@ -196,7 +197,8 @@ class MotionPlanning(Drone):
         # IYPPA-4 start
         # DONE: adapt to set goal as latitude / longitude position and convert
 	# 37.797330, -122.402224
-        goal_local_pos = global_to_local([-122.402224,37.797330,self.global_home[2]],self.global_home)
+        #goal_local_pos = global_to_local([-122.402524,37.797330,self.global_home[2]],self.global_home)
+        goal_local_pos = global_to_local([-122.401902,37.794409,self.global_home[2]],self.global_home)
         grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
         if grid[grid_goal[0]][grid_goal[1]] > 0:   # a collision
             print("\nERROR: specified goal is a collision, aborting planning!")

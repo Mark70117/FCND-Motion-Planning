@@ -138,20 +138,22 @@ grid_start = (int(current_local_pos[0]-north_offset), int(current_local_pos[1]-e
 This rubric item is marked in file motion_planning.py with comment IYPPA-4.
 
 ```
-        goal_local_pos = global_to_local([-122.402224,37.797330,self.global_home[2]],self.global_home)
+        goal_local_pos = global_to_local([-122.401902,37.794409,self.global_home[2]],self.global_home)
         grid_goal = (int(goal_local_pos[0]-north_offset), int(goal_local_pos[1]-east_offset))
 ```
 
-The goal location can be changed by replacing `-122.402224,37.797330` with the desired longitude,
+The goal location can be changed by replacing `-122.401902,37.794409` with the desired longitude,
 latitude.  global_to_local() translates the geotic coordinates to the local map reference frame.
 grid_goal is set by translating the local map reference coordinates into grid coordiantes by
 subtracting off the offset vector (north_offset, east_offset)
 
-The goal of lat 37.797330, lon -122.402224 (in the simulator world) of the original
+The original goal of lat 37.797330, lon -122.402224 (in the simulator world) of the original
 rubric is an alley way between buildings of the United States Immigrations and Customs
 Enforcement group in the real world.  While it is possible to fly into this space without
 a physical collision, it would be nevertheless unwise to set as a goal without explicit permision
-of this organization.
+of this organization. Because of misalignment of the colliders and the building in the simulator,
+a known problem, the SAFETY_DISTANCE = 5 when using the grid based Astar method instead of
+SAFETY_DISTANCE = 3 when using the medial axis.
 
 #### [IYPPA-5] Write your search algorithm
 
@@ -166,11 +168,16 @@ The SAFETY margin was increased to 5m due to some alignemnt problems with the
 collision data and the simulator.  This was necessary because the grid method
 tends to plan close to the edge of the grid.
 
-The alternative A* method using medial axis was implementented.  The code used
+An alternative A* method using medial axis was implementented.  The code used
 was essentially the code presented in lectures. Specifically Lesson 6, section
 13. 'Medial Axis Exercise'.   This method plans considerably faster than A* grid
 method.  Since it tends to stay as far away from collisions as possible, the
-SAFETY limit was left at the original 3m.
+SAFETY limit was left at the original 3m. This code can be selected by changing
+the METHOD = AStarMethod.GRID to METHOD = AStarMethod.MEDIAL_AXIS
+
+However METHOD = AStarMethod.GRID was used since it produces staighter waypaths
+which prune more pretty making it easier for reviewers to realize that the pruning
+algorithm was cut and paste from the solution provided in class.
 
 #### [IYPPA]-6] Cull waypoints from the path
 
